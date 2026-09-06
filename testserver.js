@@ -51,28 +51,25 @@ app.post('/api/sendMsg', async (req, res) => {
   try {
     const { message } = req.body;
 
-    console.log(message);
+    
     const timestamp = new Date().toISOString();
     const ip = req.ip;
+
+    await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`[1, 'user', message]);
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: message }],
     });
     const reply = completion.choices[0].message.content;
-	  console.log(reply);
 
-	  const logEntry = `
-========================================
+	  const logEntry = 
+`========================================
 Timestamp: ${timestamp}
 IP: ${ip}
 User: ${message}
 LLM: ${reply}
-========================================
-
-`;
-	   console.log('__dirname:', __dirname);
-    console.log('logFile:', logFile);
+========================================`;
 
     fs.appendFileSync(logFile, logEntry);
 
