@@ -1,4 +1,4 @@
-import 'dotenv/config'
+require('dotenv').config();
 
 const express = require('express');
 const db = require('./db');
@@ -66,7 +66,7 @@ app.post('/api/sendMsg', async (req, res) => {
 ========================================
 Timestamp: ${timestamp}
 IP: ${ip}
-User: $:{message}
+User: ${message}
 LLM: ${reply}
 ========================================
 
