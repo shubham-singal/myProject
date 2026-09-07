@@ -55,7 +55,7 @@ app.post('/api/sendMsg', async (req, res) => {
     const timestamp = new Date().toISOString();
     const ip = req.ip;
 
-    await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`[1, 'user', message]);
+    await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`,[1, 'user', message]);
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
