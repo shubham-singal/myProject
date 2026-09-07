@@ -29,9 +29,10 @@ if prompt := st.chat_input("What is up?"):
         res = requests.post("http://localhost:3000/api/sendMsg", json={"message": prompt}, timeout=30)
 
         full_response = res.json()
-        st.markdown(full_response)
+        reply = full_response.get("reply", "No reply received.")
+        st.markdown(reply)
 
     # Add assistant response to chat history
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+    st.session_state.messages.append({"role": "assistant", "content": reply})
 
 
