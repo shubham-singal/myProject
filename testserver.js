@@ -49,11 +49,9 @@ app.get('/api/products/:id', async (req, res) => {
 // Save chat message
 app.post('/api/sendMsg', async (req, res) => {
   try {
-    const { message } = req.body;
-
-    
     const timestamp = new Date().toISOString();
     const ip = req.ip;
+    const { message } = req.body;
 
     await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`,[1, 'user', message]);
 
@@ -61,31 +59,32 @@ app.post('/api/sendMsg', async (req, res) => {
       model: "gpt-4o-mini",
       messages: [{ role: "user", content: message }],
     });
+
     const reply = completion.choices[0].message.content;
-
-	  const logEntry = 
-`========================================
-Timestamp: ${timestamp}
-IP: ${ip}
-User: ${message}
-LLM: ${reply}
-========================================`;
-
-    fs.appendFileSync(logFile, logEntry);
-
-    console.log('Log written successfully');
-
     res.json({ reply });
+    
+    saveLogToFile(timestamp, ip, message, reply);
 
   } catch (err) {
     console.error('Error in /api/sendMsg:', err);
-
     res.status(500).json({
       error: err.message
     });
   }
 });
 
+
+function saveLogToFile(timestamp, ip, message, reply) {
+  	  const logEntry = 
+`========================================
+    Timestamp: ${timestamp}
+    IP: ${ip}
+    User: ${message}
+    LLM: ${reply}
+========================================`;
+
+    fs.appendFileSync(logFile, logEntry);
+}
 
 
 
