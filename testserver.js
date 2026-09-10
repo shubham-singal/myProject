@@ -53,17 +53,32 @@ app.post('/api/sendMsg', async (req, res) => {
     const ip = req.ip;
     const { message } = req.body;
 
+    const [rows] = await db.query(
+      `SELECT role, message FROM chat_messages
+      WHERE user_id = ? ORDER BY id ASC`, [1]
+    );
+
+    const chatHistory = rows.map(row =>({
+      role : row.role,
+      content: row.message
+    }));
+
+    chatHistory.push({
+      role : 'user',
+      content: message
+    });
+
     await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`,[1, 'user', message]);
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: message }],
+      messages: chatHistory,
     });
 
     const reply = completion.choices[0].message.content;
     res.json({ reply });
    
-    await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`,[1, 'SYSTEM', reply]);	  
+    await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`,[1, 'assistant', reply]);	  
 	  
     
     saveLogToFile(timestamp, ip, message, reply);
