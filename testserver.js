@@ -62,6 +62,9 @@ app.post('/api/sendMsg', async (req, res) => {
 
     const reply = completion.choices[0].message.content;
     res.json({ reply });
+   
+    await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`,[1, 'SYSTEM', reply]);	  
+	  
     
     saveLogToFile(timestamp, ip, message, reply);
 
