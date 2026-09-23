@@ -12,7 +12,20 @@ const path = require('path');
 const logFile = path.join(__dirname, 'chat.log');
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-app.use(express.json()); 
+app.use(express.json());
+
+app.get('/', async (req, res) => {
+  try {
+    const[rows] = await db.query('SELECT * FROM chat_messages');
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({
+      error: err.message
+    })
+  }
+
+})
 
 app.get('/api/products', async (req, res) => {
 	try {
@@ -58,10 +71,7 @@ app.post('/api/sendMsg', async (req, res) => {
       WHERE user_id = ? ORDER BY id ASC`, [1]
     );
 
-    const chatHistory = rows.map(row =>({
-      role : row.role,
-      content: row.message
-    }));
+    const chatHistory = getChatHistory(rows);
 
     chatHistory.push({
       role : 'user',
@@ -79,7 +89,7 @@ app.post('/api/sendMsg', async (req, res) => {
     res.json({ reply });
    
     await db.query(`INSERT INTO chat_messages (user_id, role, message) VALUES (?, ?, ?)`,[1, 'assistant', reply]);	  
-	  
+	  console.log("Inserting into DB finished");
     
     saveLogToFile(timestamp, ip, message, reply);
 
@@ -102,6 +112,14 @@ function saveLogToFile(timestamp, ip, message, reply) {
 ========================================`;
 
     fs.appendFileSync(logFile, logEntry);
+}
+
+function getChatHistory(chatRecords) {
+  return chatRecords.map(row => ({
+    role : row.role,
+    content: row.message
+  }));
+
 }
 
 
