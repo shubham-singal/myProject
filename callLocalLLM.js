@@ -1,10 +1,12 @@
 async function callQwenAPI() {
-  const url = "https://sf5gnwidpsultu-644112ad-8000.proxy.runpod.net/chat";
+  const url = "http://3.23.52.112:8000/chat";
 
 const payload = {
     messages: [
-      { role: "user", content: "explain python" }
-    ]
+      { role: "user", content: "Give me a short poem!" }
+    ],
+    // "max_tokens": 100,
+    // "temperature": 0.9
   };
 
 
